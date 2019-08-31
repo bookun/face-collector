@@ -36,4 +36,10 @@ $ face-collector -input ./sample_input -output ./sample_output -height 100 -widt
 
 | image | description|
 | :----: | :---: |
-| ![original]("https://github.com/bookun/face-collector/blob/master/testdata/input/person1/person1.jpg")| original |
+| ![original]("https://raw.githubusercontent.com/bookun/face-collector/master/testdata/input/person1/person1.jpg")| original |
+| ![faceDetect]("https://raw.githubusercontent.com/bookun/face-collector/master/testdata/output/person1/0_Original_person1.jpg") | original face|
+| ![rotate30]("https://raw.githubusercontent.com/bookun/face-collector/master/testdata/output/person1/0_Angle30Blur0_person1.jpg") | rotate 30|
+| ![rotate45]("https://raw.githubusercontent.com/bookun/face-collector/master/testdata/output/person1/0_Angle45Blur0_person1.jpg") | rotate 45|
+| ![rotate315]("https://raw.githubusercontent.com/bookun/face-collector/master/testdata/output/person1/0_Angle315Blur0_person1.jpg") | rotate 315|
+| ![rotate330]("https://raw.githubusercontent.com/bookun/face-collector/master/testdata/output/person1/0_Angle330Blur0_person1.jpg") | rotate 330|
+| ![blur]("https://raw.githubusercontent.com/bookun/face-collector/master/testdata/output/person1/0_Angle0Blur3_person1.jpg") | blur 3|
