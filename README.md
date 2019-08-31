@@ -31,7 +31,35 @@ Usage of face-collector:
   -width int
         width (default 100)
 
-$ face-collector -input ./sample_input -output ./sample_output -height 100 -width 100 -c ./haarcascade_frontalface_alt.xml
+$ face-collector -input ./testdata/input -output ./testdata/output -height 100 -width 100 -c ./haarcascade_frontalface_default.xml
+
+$ tree -L 2 testdata/output
+testdata/output
+├ person1
+│   ├ 0_Angle0Blur3_person1-1.jpg
+│   ├ 0_Angle0Blur3_person1-2.jpg
+│   ├ 0_Angle30Blur0_person1-1.jpg
+│   ├ 0_Angle30Blur0_person1-2.jpg
+│   ├ 0_Angle315Blur0_person1-1.jpg
+│   ├ 0_Angle315Blur0_person1-2.jpg
+│   ├ 0_Angle330Blur0_person1-1.jpg
+│   ├ 0_Angle330Blur0_person1-2.jpg
+│   ├ 0_Angle45Blur0_person1-1.jpg
+│   ├ 0_Angle45Blur0_person1-2.jpg
+│   ├ 0_Original_person1-1.jpg
+│   ├ 0_Original_person1-2.jpg
+│   ├ 0_person1-1.jpg
+│   └ 0_person1-2.jpg
+└ person2
+    ├ 0_Angle0Blur3_person2-1.jpg
+    ├ 0_Angle30Blur0_person2-1.jpg
+    ├ 0_Angle315Blur0_person2-1.jpg
+    ├ 0_Angle330Blur0_person2-1.jpg
+    ├ 0_Angle45Blur0_person2-1.jpg
+    ├ 0_Original_person2-1.jpg
+    └ 0_person2-1.jpg
+
+2 directories, 21 files
 ```
 
 | image | description|
