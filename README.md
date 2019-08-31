@@ -14,7 +14,7 @@ $ make install
 
 ## How to Use
 
-At first, download [a cascade classifier file](https://github.com/bookun/face-collector/blob/master/data/haarcascade_frontalface_alt.xml)
+At first, download [a cascade classifier file](https://github.com/bookun/face-collector/blob/master/data/haarcascade_frontalface_default.xml)
 
 ```
 $ go get -u github.com/bookun/face-collector
