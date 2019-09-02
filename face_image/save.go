@@ -16,6 +16,7 @@ import (
 	"github.com/bookun/face-collector/util"
 	"github.com/disintegration/imaging"
 	"gocv.io/x/gocv"
+	"golang.org/x/sync/errgroup"
 )
 
 type parameter struct {
@@ -92,16 +93,23 @@ func SaveFaceImages(ctx context.Context, imagePath string, op entity.Operation) 
 				{name: "Angle330Blur0", angle: 330, blur: 0, width: width, height: height},
 				{name: "Angle0Blur3", angle: 0, blur: 3, width: width, height: height},
 			}
-
+			eg, _ := errgroup.WithContext(context.TODO())
 			for _, param := range params {
-				mat, err := createImage(newImg, param)
-				if err != nil {
-					return err
-				}
-				if !gocv.IMWrite(fmt.Sprintf("%s/%d_%s_%s", dirPath, i, param.name, fileName), mat) {
-					return fmt.Errorf("write error")
-				}
-
+				p := param
+				eg.Go(func() error {
+					mat, err := createImage(newImg, p)
+					if err != nil {
+						return err
+					}
+					if !gocv.IMWrite(fmt.Sprintf("%s/%d_%s_%s", dirPath, i, p.name, fileName), mat) {
+						return fmt.Errorf("write error")
+					}
+					fmt.Printf("created: %s/%d_%s_%s\n", dirPath, i, p.name, fileName)
+					return nil
+				})
+			}
+			if err := eg.Wait(); err != nil {
+				return err
 			}
 		}
 		return nil
