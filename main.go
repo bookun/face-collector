@@ -20,6 +20,7 @@ func main() {
 		Width:             flag.Int("width", 100, "width"),
 		Height:            flag.Int("height", 100, "height"),
 		CascadeClassifier: flag.String("c", "", "cascade classifier filepath"),
+		Gray:              flag.Bool("g", false, "grayscale"),
 	}
 	flag.Parse()
 	if *operation.CascadeClassifier == "" {
@@ -30,12 +31,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	limit := make(chan struct{}, 12)
 	eg, ctx := errgroup.WithContext(context.TODO())
 	for _, imagePath := range imagePaths {
 		path := imagePath
 		eg.Go(func() error {
-			return face_image.SaveFaceImages(ctx, path, operation)
+			limit <- struct{}{}
+			err := face_image.SaveFaceImages(ctx, path, operation)
+			<-limit
+			return err
 		})
 	}
 	if err := eg.Wait(); err != nil {

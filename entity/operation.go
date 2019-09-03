@@ -6,4 +6,5 @@ type Operation struct {
 	CascadeClassifier *string
 	Width             *int
 	Height            *int
+	Gray              *bool
 }

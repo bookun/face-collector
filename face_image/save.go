@@ -8,7 +8,6 @@ import (
 	"image/draw"
 	_ "image/jpeg"
 	_ "image/png"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -66,7 +65,7 @@ func SaveFaceImages(ctx context.Context, imagePath string, op entity.Operation) 
 		if err != nil {
 			return err
 		}
-		rects := classifier.DetectMultiScale(img)
+		rects := classifier.DetectMultiScaleWithParams(img, 1.30, 4, 0, image.Point{0, 0}, image.Point{10000, 10000})
 		fileName := filepath.Base(imagePath)
 		fmt.Printf("found %d faces in %s\n", len(rects), fileName)
 		for i, r := range rects {
@@ -77,11 +76,6 @@ func SaveFaceImages(ctx context.Context, imagePath string, op entity.Operation) 
 			if err := util.CreateDir(dirPath); err != nil {
 				return err
 			}
-			outputFile, err := os.Create(fmt.Sprintf("%s/%d_%s", dirPath, i, fileName))
-			if err != nil {
-				return err
-			}
-			defer outputFile.Close()
 			newImg := image.NewRGBA(r)
 			draw.Draw(newImg, newImg.Bounds(), imgImg, r.Min, draw.Over)
 
@@ -100,6 +94,9 @@ func SaveFaceImages(ctx context.Context, imagePath string, op entity.Operation) 
 					mat, err := createImage(newImg, p)
 					if err != nil {
 						return err
+					}
+					if *op.Gray {
+						gocv.CvtColor(mat, &mat, gocv.ColorBGRToGray)
 					}
 					if !gocv.IMWrite(fmt.Sprintf("%s/%d_%s_%s", dirPath, i, p.name, fileName), mat) {
 						return fmt.Errorf("write error")
