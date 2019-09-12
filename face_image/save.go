@@ -10,12 +10,12 @@ import (
 	_ "image/png"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/bookun/face-collector/entity"
 	"github.com/bookun/face-collector/util"
 	"github.com/disintegration/imaging"
 	"gocv.io/x/gocv"
-	"golang.org/x/sync/errgroup"
 )
 
 type parameter struct {
@@ -67,7 +67,13 @@ func SaveFaceImages(ctx context.Context, imagePath string, op entity.Operation) 
 		}
 		rects := classifier.DetectMultiScaleWithParams(img, 1.30, 4, 0, image.Point{0, 0}, image.Point{10000, 10000})
 		fileName := filepath.Base(imagePath)
-		fmt.Printf("found %d faces in %s\n", len(rects), fileName)
+		isJpeg, err := util.IsJPEG(imagePath)
+		if err != nil {
+			return err
+		}
+		if !isJpeg {
+			return nil
+		}
 		for i, r := range rects {
 			fName := strings.Replace(imagePath, *op.InputDir, "", -1)
 			parts := strings.Split(fName, "/")
@@ -81,33 +87,35 @@ func SaveFaceImages(ctx context.Context, imagePath string, op entity.Operation) 
 
 			params := []parameter{
 				{name: "Original", angle: 0, blur: 0, width: width, height: height},
-				{name: "Angle30Blur0", angle: 30, blur: 0, width: width, height: height},
-				{name: "Angle45Blur0", angle: 45, blur: 0, width: width, height: height},
-				{name: "Angle315Blur0", angle: 315, blur: 0, width: width, height: height},
-				{name: "Angle330Blur0", angle: 330, blur: 0, width: width, height: height},
-				{name: "Angle0Blur3", angle: 0, blur: 3, width: width, height: height},
 			}
-			eg, _ := errgroup.WithContext(context.TODO())
+			if *op.DataArguation {
+				params = append(params,
+					parameter{name: "Original", angle: 0, blur: 0, width: width, height: height},
+					parameter{name: "Angle30Blur0", angle: 30, blur: 0, width: width, height: height},
+					parameter{name: "Angle45Blur0", angle: 45, blur: 0, width: width, height: height},
+					parameter{name: "Angle315Blur0", angle: 315, blur: 0, width: width, height: height},
+					parameter{name: "Angle330Blur0", angle: 330, blur: 0, width: width, height: height},
+					parameter{name: "Angle0Blur3", angle: 0, blur: 3, width: width, height: height},
+				)
+			}
+			wg := &sync.WaitGroup{}
 			for _, param := range params {
-				p := param
-				eg.Go(func() error {
-					mat, err := createImage(newImg, p)
+				go func(param parameter, dirPath, fileName string, newImg *image.RGBA) {
+					wg.Add(1)
+					mat, err := createImage(newImg, param)
 					if err != nil {
-						return err
+						fmt.Printf("[ERROR] %v\n", err)
 					}
 					if *op.Gray {
 						gocv.CvtColor(mat, &mat, gocv.ColorBGRToGray)
 					}
-					if !gocv.IMWrite(fmt.Sprintf("%s/%d_%s_%s", dirPath, i, p.name, fileName), mat) {
-						return fmt.Errorf("write error")
+					if !gocv.IMWrite(fmt.Sprintf("%s/%d_%s_%s", dirPath, i, param.name, fileName), mat) {
+						fmt.Printf("[ERROR] write error: %s/%d_%s_%s", dirPath, i, param.name, fileName)
 					}
-					fmt.Printf("created: %s/%d_%s_%s\n", dirPath, i, p.name, fileName)
-					return nil
-				})
+					wg.Done()
+				}(param, dirPath, fileName, newImg)
 			}
-			if err := eg.Wait(); err != nil {
-				return err
-			}
+			wg.Wait()
 		}
 		return nil
 	}

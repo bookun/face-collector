@@ -7,4 +7,6 @@ type Operation struct {
 	Width             *int
 	Height            *int
 	Gray              *bool
+	Concurrency       *int
+	DataArguation     *bool
 }
